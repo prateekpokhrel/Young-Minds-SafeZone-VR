@@ -4,26 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SafeZone VR - Hazardous Work Simulator</title>
-
-  <!-- A-Frame Library for Native WebVR/AR Capabilities directly in HTML -->
+  <title>SafeZone VR</title>
+  <!-- A-Frame Library -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.3.3/dist/aframe-environment-component.min.js"></script>
 
   <style>
-    /* CSS resets and layout */
     body,
     html {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       overflow: hidden;
       background-color: #0d0e15;
+      font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
     }
 
-    /* Glassmorphism UI Overlay */
     #ui-overlay {
       position: absolute;
       top: 0;
@@ -36,395 +33,377 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #ffffff;
+      color: #fff;
       text-align: center;
-      transition: opacity 0.5s ease-in-out, visibility 0.5s;
     }
 
-    .title-container h1 {
-      font-size: 4.5rem;
+    h1 {
+      font-size: 3.5rem;
       margin: 0;
-      font-weight: 800;
-      letter-spacing: 3px;
-      background: linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%);
+      background: linear-gradient(90deg, #00C9FF, #92FE9D);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
     }
 
-    .title-container p {
-      font-size: 1.2rem;
+    #prompt {
       color: #a0a5d4;
-      font-weight: 300;
-      margin-top: 10px;
-      margin-bottom: 50px;
-      letter-spacing: 1px;
+      margin-bottom: 30px;
     }
 
-    .cards-grid {
+    .cards {
       display: flex;
-      gap: 30px;
+      gap: 20px;
       flex-wrap: wrap;
       justify-content: center;
     }
 
-    .sim-card {
-      background: rgba(255, 255, 255, 0.03);
-      padding: 40px 30px;
-      border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      width: 280px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 25px;
+      border-radius: 15px;
+      width: 220px;
       cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      transition: 0.3s;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .sim-card:hover {
-      transform: translateY(-15px) scale(1.02);
-      background: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    .card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    .sim-card.electrical {
-      border-top: 5px solid #f39c12;
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 5px;
+      font-size: 1.3rem;
     }
 
-    .sim-card.fire {
-      border-top: 5px solid #e74c3c;
+    .card p {
+      font-size: 0.85rem;
+      color: #ccc;
     }
 
-    .sim-card.mechanical {
-      border-top: 5px solid #3498db;
+    .card.elec {
+      border-top: 4px solid #f39c12;
     }
 
-    .sim-card .icon {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      display: inline-block;
-      padding: 20px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.3);
+    .card.fire {
+      border-top: 4px solid #e74c3c;
     }
 
-    .sim-card h2 {
-      margin: 0;
-      font-size: 1.6rem;
-      margin-bottom: 10px;
+    .card.mech {
+      border-top: 4px solid #3498db;
     }
 
-    .sim-card p {
-      font-size: 0.95rem;
-      color: #b2b2b2;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    .electrical h2 {
-      color: #f39c12;
-    }
-
-    .fire h2 {
-      color: #e74c3c;
-    }
-
-    .mechanical h2 {
-      color: #3498db;
-    }
-
-    /* In-game HUD */
     #vr-hud {
       position: absolute;
-      bottom: 30px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 100;
-      background: rgba(10, 15, 25, 0.85);
-      padding: 20px 40px;
-      border-radius: 50px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px 30px;
+      border-radius: 10px;
       display: none;
+      border: 1px solid #3498db;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      min-width: 400px;
+      pointer-events: auto;
+      /* ensure we can click the button */
     }
 
-    #vr-instruction {
+    #hud-msg {
       color: #fff;
       font-size: 1.2rem;
-      margin: 0 0 15px 0;
-      font-weight: 500;
+      font-weight: bold;
+      margin-top: 0;
     }
 
-    .btn-exit {
-      background: linear-gradient(135deg, #e74c3c, #c0392b);
+    .prog {
+      color: #aaa;
+      text-align: left;
+      list-style: none;
+      padding: 0;
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+
+    .prog li::before {
+      content: '⏳ ';
+    }
+
+    .prog li.done {
+      color: #2ecc71;
+    }
+
+    .prog li.done::before {
+      content: '✅ ';
+    }
+
+    button {
+      background: #e74c3c;
       color: white;
       border: none;
-      padding: 10px 25px;
-      border-radius: 20px;
-      font-size: 1rem;
+      padding: 10px 20px;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.3s;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      border-radius: 5px;
     }
 
-    .btn-exit:hover {
-      transform: scale(1.05);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
-    }
-
-    /* Splash alert */
-    #alert-box {
+    #alert {
       position: absolute;
-      top: 20px;
+      top: 10px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 200;
-      background: rgba(231, 76, 60, 0.9);
-      padding: 15px 30px;
-      border-radius: 10px;
+      background: red;
       color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
       font-weight: bold;
-      font-size: 1.2rem;
       display: none;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-      border: 2px solid #ffcccc;
+    }
+
+    /* Essential for mouse clicking on a-frame objects */
+    .clickable {
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
-  <a-scene>
-    <!-- UI Main Menu Overlay -->
-    <div id="ui-overlay">
-      <div class="title-container">
-        <h1>SAFEZONE VR</h1>
-        <p>Immersive High-Risk & Hazardous Work Simulator</p>
+  <div id="alert">ERROR</div>
+
+  <div id="ui-overlay">
+    <h1>SAFEZONE VR</h1>
+    <p id="prompt">Select a High-Risk Task to Practice</p>
+    <div class="cards">
+      <div class="card elec" onclick="runSim('elec')">
+        <h2 style="color:#f39c12;">Electrical</h2>
+        <p>Learn to isolate power and repair live circuits safely.</p>
       </div>
-
-      <div class="cards-grid">
-        <!-- Electrical Simulation -->
-        <div class="sim-card electrical" onclick="launchSimulation('electrical')">
-          <span class="icon" style="color:#f39c12;">⚡</span>
-          <h2>Electrical Repair</h2>
-          <p>Learn to handle live wire repairs. Practice donning protective gear before interacting with exposed 220V
-            circuitry.</p>
-        </div>
-
-        <!-- Fire Extinguishing Simulation -->
-        <div class="sim-card fire" onclick="launchSimulation('fire')">
-          <span class="icon" style="color:#e74c3c;">🔥</span>
-          <h2>Fire Suppression</h2>
-          <p>Respond dynamically to workplace chemical and electrical fires. Equip extinguishers to secure the
-            environment.</p>
-        </div>
-
-        <!-- Mechanical Workshop -->
-        <div class="sim-card mechanical" onclick="launchSimulation('mechanical')">
-          <span class="icon" style="color:#3498db;">⚙️</span>
-          <h2>Industrial Workshop</h2>
-          <p>Interact with high-speed lathe machines. Master the operation and emergency shutdown procedures safely.</p>
-        </div>
+      <div class="card fire" onclick="runSim('fire')">
+        <h2 style="color:#e74c3c;">Fire Control</h2>
+        <p>Douse dangerous chemical fires using the P.A.S.S method.</p>
+      </div>
+      <div class="card mech" onclick="runSim('mech')">
+        <h2 style="color:#3498db;">Lockout/Tagout</h2>
+        <p>Halt machinery and apply LOTO protocols safely.</p>
       </div>
     </div>
+  </div>
 
-    <!-- Heads Up Display strictly mapped inside CSS over VR Engine -->
-    <div id="vr-hud">
-      <p id="vr-instruction">Task instruction will appear here.</p>
-      <button class="btn-exit" onclick="exitSimulation()">Abort Mission & Exit</button>
-    </div>
+  <div id="vr-hud">
+    <p id="hud-msg"></p>
+    <ul class="prog" id="prog-list"></ul>
+    <button onclick="exitSim()">EXIT SIMULATION</button>
+  </div>
 
-    <div id="alert-box">CRITICAL DANGER: Procedure Failed!</div>
+  <a-scene id="virt-scene" style="display: none;" cursor="rayOrigin: mouse;" raycaster="objects: .clickable">
+    <a-entity camera look-controls position="0 1.6 0">
+      <!-- Raycaster directly on camera allows picking objects by looking/clicking mouse -->
+      <a-text id="ttip" value="" position="0 -0.1 -1" align="center" width="1.5" color="yellow"></a-text>
+    </a-entity>
+    <a-entity id="world-content"></a-entity>
+  </a-scene>
 
-    <!-- VR Subsystem (A-Frame Engine rendered as HTML) -->
-    <a-scene id="vr-scene" style="display: none;" cursor="rayOrigin: mouse"
-      loading-screen="dotsColor: white; backgroundColor: black">
-      <!-- Player Object -->
-      <a-entity id="player" position="0 1.6 0">
-        <a-camera look-controls wasd-controls>
-          <!-- VR Reticle Cursor -->
-          <a-cursor color="#FFF" material="shader: flat; opacity: 0.8"
-            animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.2 0.2 0.2; to: 1 1 1"
-            animation__fusing="property: fusing; startEvents: fusing; easing: easeInCubic; dur: 1500; from: 1 1 1; to: 0.2 0.2 0.2"></a-cursor>
-        </a-camera>
-      </a-entity>
+  <script>
+    const ui = document.getElementById('ui-overlay');
+    const vScene = document.getElementById('virt-scene');
+    const hud = document.getElementById('vr-hud');
+    const world = document.getElementById('world-content');
+    const hudMsg = document.getElementById('hud-msg');
+    const tasks = document.getElementById('prog-list');
+    const alertBox = document.getElementById('alert');
+    const ttip = document.getElementById('ttip');
 
-      <!-- Scene Content Holder -->
-      <a-entity id="scene-wrapper"></a-entity>
-    </a-scene>
+    window.S = {}; // State
 
-    <!-- JS Logic specific to interactions -->
-    <script>
-      const uiOverlay = document.getElementById('ui-overlay');
-      const vrScene = document.getElementById('vr-scene');
-      const vrHud = document.getElementById('vr-hud');
-      const alertBox = document.getElementById('alert-box');
-      const sceneWrapper = document.getElementById('scene-wrapper');
-      const instruction = document.getElementById('vr-instruction');
+    function setObjAttr(id, attr, val) { document.getElementById(id).setAttribute(attr, val); }
+    function showMsg(m, c = 'white') { hudMsg.innerText = m; hudMsg.style.color = c; }
+    function fail(m) { alertBox.innerText = "FAILED: " + m; alertBox.style.display = 'block'; setTimeout(exitSim, 3000); }
 
-      // State machine
-      window.simState = {};
+    // Setup tasks
+    function initTasks(list) {
+      tasks.innerHTML = '';
+      list.forEach((t, i) => { tasks.innerHTML += `<li id="t${i}">${t}</li>`; });
+    }
+    function doneT(i) { document.getElementById('t' + i).className = 'done'; }
 
-      function launchSimulation(type) {
-        // Hide UI, Show Engine
-        uiOverlay.style.visibility = 'hidden';
-        uiOverlay.style.opacity = '0';
-        vrScene.style.display = 'block';
-        vrHud.style.display = 'block';
+    // Hover events globally defined
+    window.hIn = (txt) => { ttip.setAttribute('value', txt); };
+    window.hOut = () => { ttip.setAttribute('value', ''); };
+    const evts = (txt, cls, fn) => `class="clickable ${cls}" onmouseenter="hIn('${txt}')" onmouseleave="hOut()" onclick="${fn}"`;
 
-        sceneWrapper.innerHTML = ''; // Reset wrapper
-        alertBox.style.display = 'none';
+    function runSim(type) {
+      ui.style.display = 'none';
+      vScene.style.display = 'block';
+      hud.style.display = 'block';
+      alertBox.style.display = 'none';
+      world.innerHTML = '';
 
-        if (type === 'electrical') {
-          instruction.innerText = 'GOAL: Equip Safety Gloves, then repair the sparking socket pane. (Click to interact)';
+      if (type === 'mech') {
+        showMsg('DANGER: Machine Malfunction. Perform Lockout/Tagout.', '#3498db');
+        initTasks(['Press Yellow Emergency Stop', 'Pull Wall Handle down to Isolate', 'Attach Red Padlock to box', 'Test Start Button to verify 0 energy']);
+        S = { step: 0 };
 
-          // Set mood
-          sceneWrapper.innerHTML += `<a-entity environment="preset: default; groundColor: #2b3036; groundYScale: 5; skyType: atmosphere; lighting: point"></a-entity>`;
+        world.innerHTML += `<a-entity environment="preset: tron"></a-entity>`;
 
-          // Work desk
-          sceneWrapper.innerHTML += `
-                    <a-box position="0 0.8 -2" width="2" height="0.1" depth="1" color="#4a3b2c" shadow></a-box>
-                    <a-box position="-0.9 0.4 -2" width="0.1" height="0.8" depth="0.8" color="#333"></a-box>
-                    <a-box position="0.9 0.4 -2" width="0.1" height="0.8" depth="0.8" color="#333"></a-box>
-                `;
-
-          // Wall Socket
-          sceneWrapper.innerHTML += `
-                    <a-box position="0 1.6 -3" width="4" height="3" depth="0.1" color="#8b9bb4"></a-box>
+        // Machine
+        world.innerHTML += `
+                    <a-box position="-1 1 -3.5" width="2" height="1.5" depth="1" color="#555"></a-box>
+                    <a-cylinder id="chuck" position="0.5 1.5 -3.5" radius="0.3" height="0.5" rotation="0 0 90" color="#aaa"
+                         animation="property: rotation; to: 360 0 90; loop: true; dur: 200; easing: linear"></a-cylinder>
+                         
+                    <a-box position="-0.5 1.5 -2.9" width="0.6" height="0.4" depth="0.1" color="#222"></a-box>
                     
-                    <a-entity id="circuit-box" position="0 1.5 -2.9" class="clickable" onclick="interact('socket')">
-                        <a-box width="0.5" height="0.6" depth="0.1" color="#bbbbbb"></a-box>
-                        <a-cylinder position="-0.1 0 0.05" radius="0.04" height="0.02" rotation="90 0 0" color="#222"></a-cylinder>
-                        <a-cylinder position="0.1 0 0.05" radius="0.04" height="0.02" rotation="90 0 0" color="#222"></a-cylinder>
-                        
-                        <!-- Spark Particles (simulated with pulsating sphere) -->
-                        <a-sphere id="spark-anim" position="0 0.1 0.1" radius="0.03" color="#ffff00" material="shader: flat; opacity: 0.9;"
-                                  animation="property: scale; from: 0.5 0.5 0.5; to: 1.5 1.5 1.5; dir: alternate; loop: true; dur: 80">
-                        </a-sphere>
-                    </a-entity>
+                    <a-cylinder ${evts('E-STOP', '', 'act(`m_estop`)')} id="btn-stop" position="-0.7 1.5 -2.85" radius="0.08" height="0.05" rotation="90 0 0" color="yellow"></a-cylinder>
+                    <a-cylinder ${evts('START BUTTON', '', 'act(`m_start`)')} id="btn-start" position="-0.3 1.5 -2.85" radius="0.08" height="0.05" rotation="90 0 0" color="green"></a-cylinder>
                 `;
 
-          // Safety Gloves Item
-          sceneWrapper.innerHTML += `
-                    <a-entity id="gloves" position="-0.5 0.9 -1.8" rotation="0 45 0" class="clickable" onclick="interact('gloves')">
-                        <a-box width="0.2" height="0.05" depth="0.3" color="#f39c12"></a-box>
-                        <a-text value="Rubber Gloves" position="0 0.1 0" align="center" width="1.5" color="#fff" rotation="-90 0 0"></a-text>
-                    </a-entity>
+        // Wall Box
+        world.innerHTML += `
+                    <a-box position="2 1.5 -2.5" rotation="0 -30 0" width="0.8" height="1" depth="0.2" color="#777">
+                        <a-box ${evts('POWER LEVER', '', 'act(`m_lever`)')} id="lv" position="-0.5 0 0" width="0.1" height="0.4" depth="0.05" color="red"></a-box>
+                        <a-circle position="-0.5 -0.3 0" radius="0.05" color="black"></a-circle> <!-- Hole -->
+                        <a-box id="lock" position="-0.5 -0.4 0.05" width="0.12" height="0.15" depth="0.05" color="red" visible="false">
+                             <a-torus position="0 0.1 0" radius="0.04" radius-tubular="0.01" color="silver"></a-torus>
+                             <a-plane position="0 -0.05 0.03" width="0.1" height="0.05" color="white"><a-text value="LOTO" align="center" width="0.5" color="black"></a-text></a-plane>
+                        </a-box>
+                    </a-box>
                 `;
-          window.simState = { glovesEquipped: false };
 
-        } else if (type === 'fire') {
-          instruction.innerText = 'CRITICAL: Grab the Red Fire Extinguisher and aim at the source to extinguish the flames!';
+        // Lock on table
+        world.innerHTML += `
+                    <a-box position="1 0.8 -1.5" width="1" height="0.1" depth="0.6" color="#444"></a-box>
+                    <a-box ${evts('Grab Padlock', '', 'act(`m_lock`)')} id="inv-lock" position="1 0.9 -1.5" width="0.12" height="0.15" depth="0.05" color="red">
+                         <a-torus position="0 0.1 0" radius="0.04" radius-tubular="0.01" color="silver"></a-torus>
+                         <a-plane position="0 -0.05 0.03" width="0.1" height="0.05" color="white"><a-text value="LOTO" align="center" width="0.5" color="black"></a-text></a-plane>
+                    </a-box>
+                `;
+      }
 
-          sceneWrapper.innerHTML += `<a-entity environment="preset: volcano; skyType: gradient; dressingAmount: 0"></a-entity>`;
+      if (type === 'elec') {
+        showMsg('GOAL: Safety first. Check voltage, kill power, then repair.', '#f39c12');
+        initTasks(['Equip Insulated Gloves', 'Test Panel (Reads 220V)', 'Flip Breaker to Isolate', 'Test Panel Again (Reads 0V)', 'Fix Component safely']);
+        S = { gloved: false, tested: false, iso: false, safe: false };
 
-          // Hazard setup
-          sceneWrapper.innerHTML += `
-                    <a-box position="0 0.5 -3" width="1.5" height="0.5" depth="1.5" color="#111"></a-box>
-                    <a-cylinder position="0.5 0.8 -3" radius="0.2" height="0.5" color="#ffcc00" rotation="10 0 20"></a-cylinder>
-                    <a-cylinder position="-0.4 0.8 -2.8" radius="0.2" height="0.5" color="#55cc55" rotation="-90 20 0"></a-cylinder>
+        world.innerHTML += `<a-entity environment="preset: default"></a-entity>`;
+
+        world.innerHTML += `
+                    <a-box position="0 1.5 -3" width="1" height="1.2" depth="0.1" color="#333"></a-box>
                     
-                    <a-cone id="fire-fx" position="0 1.2 -3" radius-bottom="0.8" height="1.8" color="#ff4500" material="transparent: true; opacity: 0.8"
-                            animation="property: scale; from: 1 1 1; to: 1.1 1.05 1.1; dir: alternate; loop: true; dur: 150">
-                            <!-- Inner flame -->
-                            <a-cone position="0 -0.2 0" radius-bottom="0.5" height="1.2" color="#ffcc00"></a-cone>
-                    </a-cone>
-                `;
+                    <a-box ${evts('Repair Target', '', 'act(`e_fix`)')} id="target" position="-0.2 1.5 -2.9" width="0.2" height="0.3" depth="0.1" color="#111"></a-box>
+                    <a-sphere id="spark" position="-0.2 1.5 -2.85" radius="0.04" color="yellow" material="shader:flat" animation="property: scale; to: 1.5 1.5 1.5; loop:true; dir:alternate; dur: 80"></a-sphere>
 
-          // Extinguisher Tool
-          sceneWrapper.innerHTML += `
-                    <a-entity id="extinguisher" position="1.5 0.8 -2" class="clickable" onclick="interact('extinguish')">
-                        <a-cylinder radius="0.15" height="0.7" color="#e74c3c"></a-cylinder>
-                        <a-cylinder position="0 0.35 0" radius="0.05" height="0.1" color="silver"></a-cylinder>
-                        <a-box position="0.15 0.35 0" width="0.2" height="0.05" depth="0.05" color="#222"></a-box>
-                        <a-text value="P.A.S.S." position="0 0 0.16" align="center" width="1" color="#fff"></a-text>
-                    </a-entity>
-                `;
-
-        } else if (type === 'mechanical') {
-          instruction.innerText = 'PROCEDURE: Halt the rogue lathe machinery via the Emergency Stop before repairing.';
-
-          sceneWrapper.innerHTML += `<a-entity environment="preset: yavapai; groundColor: #444; skyType: color; skyColor: #222"></a-entity>`;
-
-          // Giant machine
-          sceneWrapper.innerHTML += `
-                    <a-box position="0 1.2 -4" width="4" height="1.5" depth="1.5" color="#4a5568"></a-box>
-                    <a-box position="-1.5 2.2 -4" width="1" height="1" depth="1" color="#2d3748"></a-box>
+                    <a-box ${evts('Main Breaker', '', 'act(`e_break`)')} id="breaker" position="0.3 1.5 -2.9" width="0.1" height="0.3" depth="0.1" color="red"></a-box>
                     
-                    <!-- Spinning Chuck -->
-                    <a-cylinder id="lathe-spin" position="-0.9 2.2 -4" radius="0.4" height="0.5" rotation="0 0 90" color="#a0aec0"
-                                animation="property: rotation; to: 360 0 90; loop: true; dur: 200; easing: linear">
-                        <a-box position="0 0.4 0" width="0.1" height="0.2" depth="0.1" color="#1a202c"></a-box>
-                    </a-cylinder>
-
-                    <!-- Control Pad -->
-                    <a-entity position="0.8 2 -3.2" rotation="-30 -20 0">
-                        <a-box width="0.8" height="0.5" depth="0.1" color="#1a202c"></a-box>
-                        <!-- E-Stop Button -->
-                        <a-cylinder id="e-stop" position="-0.2 0 0.05" radius="0.12" height="0.05" rotation="90 0 0" color="#e74c3c"
-                                  class="clickable" onclick="interact('estop')"
-                                  animation__press="property: position; startEvents: click; to: -0.2 0 0.02; dur: 100">
-                        </a-cylinder>
-                        <a-text value="E-STOP" position="-0.2 -0.2 0.06" align="center" width="1.5" color="white"></a-text>
-                        <!-- Power Indicator -->
-                        <a-circle id="power-led" position="0.2 0 0.06" radius="0.05" color="#2ecc71" material="shader: flat"></a-circle>
-                    </a-entity>
+                    <!-- Tools -->
+                    <a-box position="0 0.8 -2" width="1.5" height="0.1" depth="0.5" color="#554433"></a-box>
+                    <a-box ${evts('Grab Gloves', '', 'act(`e_glv`)')} id="gv" position="-0.4 0.9 -2" width="0.2" height="0.05" depth="0.2" color="orange"></a-box>
+                    <a-box ${evts('Use Multimeter', '', 'act(`e_multi`)')} id="mul" position="0.4 0.9 -2" width="0.1" height="0.05" depth="0.2" color="black">
+                        <a-text id="multi-out" value="0V" position="0 0.03 0" rotation="-90 0 0" align="center" width="1" color="lime"></a-text>
+                    </a-box>
                 `;
-        }
       }
 
-      function interact(action) {
-        if (action === 'gloves') {
-          window.simState.glovesEquipped = true;
-          document.getElementById('gloves').setAttribute('visible', 'false');
-          instruction.innerText = 'SUCCESS: PPE Equipped. Proceed to disconnect power and repair socket.';
-          instruction.style.color = '#2ecc71';
-        }
-        else if (action === 'socket') {
-          if (!window.simState.glovesEquipped) {
-            // Fail state
-            showAlert("FATAL SHOCK! You touched live 220V without PPE (Gloves). Simulation Terminated.");
-          } else {
-            // Success state
-            document.getElementById('spark-anim').setAttribute('visible', 'false');
-            instruction.innerText = 'MISSION SECURED: Socket safely neutralized and isolated.';
-            instruction.style.color = '#3498db';
-          }
-        }
-        else if (action === 'extinguish') {
-          document.getElementById('fire-fx').setAttribute('visible', 'false');
-          instruction.innerText = 'FIRE CONTAINED: Hazard removed safely using correct extinguisher handling.';
-          instruction.style.color = '#3498db';
-        }
-        else if (action === 'estop') {
-          document.getElementById('lathe-spin').removeAttribute('animation'); // Stop spinning
-          document.getElementById('power-led').setAttribute('color', '#e74c3c'); // LED turns red
-          instruction.innerText = 'MACHINE HALTED. Lock-Out Tag-Out protocol engaged successfully.';
-          instruction.style.color = '#3498db';
-        }
+      if (type === 'fire') {
+        showMsg('GOAL: Use P.A.S.S methodology to stop the fire!', '#e74c3c');
+        initTasks(['Pull Extinguisher Pin', 'Aim at BASE of Fire', 'Squeeze handle to Extinguish']);
+        S = { pin: false, aim: false, hp: 100 };
+
+        world.innerHTML += `<a-entity environment="preset: volcano; dressingAmount:0"></a-entity>`;
+
+        world.innerHTML += `
+                    <a-cylinder position="0 0.5 -3" radius="0.5" height="1" color="#222"></a-cylinder>
+                    <a-cone ${evts('Aim at Base', '', 'act(`f_base`)')} id="fire" position="0 1 -3" radius-bottom="0.6" height="1" color="#ff4500" material="transparent:true; opacity:0.8" animation="property: scale; to: 1.1 1.2 1.1; loop:true; dir:alternate; dur: 100"></a-cone>
+                    
+                    <a-cylinder position="1 1 -2" radius="0.15" height="0.6" color="red"></a-cylinder>
+                    <a-torus ${evts('Pull Pin', '', 'act(`f_pin`)')} id="pin" position="1 1.3 -1.85" radius="0.03" radius-tubular="0.01" rotation="0 90 0" color="yellow"></a-torus>
+                    <a-box ${evts('Squeeze Handle', '', 'act(`f_sqz`)')} id="hnd" position="0.9 1.35 -2" width="0.2" height="0.05" depth="0.05" color="black"></a-box>
+                `;
+      }
+    }
+
+    window.act = function (v) {
+      hOut(); // clear tooltip on click
+      if (v === 'm_estop') {
+        if (S.step !== 0) return fail("Use E-Stop first!");
+        setObjAttr('chuck', 'animation', ''); // stop
+        setObjAttr('btn-stop', 'position', '-0.7 1.48 -2.85');
+        doneT(0); S.step = 1; showMsg('Machine stopped. Now pull the wall breaker down.');
+      }
+      if (v === 'm_lever') {
+        if (S.step !== 1) return fail("Halt machine at panel first.");
+        setObjAttr('lv', 'position', '-0.5 -0.1 0');
+        doneT(1); S.step = 2; showMsg('Power isolated. Grab your red padlock.');
+      }
+      if (v === 'm_lock') {
+        if (S.step !== 2) return fail("Isolate power first.");
+        setObjAttr('inv-lock', 'visible', 'false');
+        setObjAttr('lock', 'visible', 'true');
+        doneT(2); S.step = 3; showMsg('LOTO applied. Crucial step: Test Start button on panel to verify zero energy.');
+      }
+      if (v === 'm_start') {
+        if (S.step < 3) return fail("CRITICAL: You started machine without finishing LOTO!");
+        doneT(3); showMsg('SUCCESS: Machine verified dead. Safe to work.', 'lime');
       }
 
-      function showAlert(msg) {
-        alertBox.innerText = msg;
-        alertBox.style.display = 'block';
-        setTimeout(() => { exitSimulation(); }, 4000);
+      if (v === 'e_glv') {
+        S.gloved = true; setObjAttr('gv', 'visible', 'false');
+        doneT(0); showMsg('Gloves on. Grab Multimeter to test target.');
+      }
+      if (v === 'e_multi') {
+        if (!S.gloved) return fail("Never approach live circuits without gloves.");
+        if (!S.iso) {
+          setObjAttr('multi-out', 'value', '220V'); setObjAttr('multi-out', 'color', 'red');
+          doneT(1); S.tested = true; showMsg('Live Voltage! Isolate the breaker.');
+        } else {
+          setObjAttr('multi-out', 'value', '0V'); setObjAttr('multi-out', 'color', 'lime');
+          doneT(3); S.safe = true; showMsg('0V Verified. Safe to repair target.');
+        }
+      }
+      if (v === 'e_break') {
+        if (!S.tested) return fail("Test voltage before throwing switches.");
+        S.iso = true; setObjAttr('breaker', 'position', '0.3 1.4 -2.9');
+        doneT(2); showMsg('Power cut. Use Multimeter again to ensure 0V.');
+      }
+      if (v === 'e_fix') {
+        if (!S.safe) return fail("SHOCK: You didn't verify 0V!");
+        setObjAttr('spark', 'visible', 'false');
+        setObjAttr('target', 'color', 'green');
+        doneT(4); showMsg('SUCCESS: Repaired safely.', 'lime');
       }
 
-      function exitSimulation() {
-        vrScene.style.display = 'none';
-        vrHud.style.display = 'none';
-        alertBox.style.display = 'none';
-        uiOverlay.style.visibility = 'visible';
-        uiOverlay.style.opacity = '1';
-        instruction.style.color = '#ffffff';
+      if (v === 'f_pin') {
+        S.pin = true; setObjAttr('pin', 'visible', 'false');
+        doneT(0); showMsg('Pin pulled. Aim at base of fire.');
       }
-    </script>
+      if (v === 'f_base') {
+        if (!S.pin) return fail("Pull pin first!");
+        S.aim = true;
+        doneT(1); showMsg('Aimed. Squeeze handle repeatedly.');
+      }
+      if (v === 'f_sqz') {
+        if (!S.aim) return fail("Aim at base first!");
+        S.hp -= 34;
+        let f = document.getElementById('fire');
+        f.setAttribute('scale', `${S.hp / 100} ${S.hp / 100} ${S.hp / 100}`);
+        if (S.hp <= 0) {
+          f.setAttribute('visible', 'false');
+          doneT(2); showMsg('SUCCESS: Fire out!', 'lime');
+        }
+      }
+    };
+
+    function exitSim() {
+      vScene.style.display = 'none';
+      hud.style.display = 'none';
+      alertBox.style.display = 'none';
+      ui.style.display = 'flex';
+    }
+  </script>
 </body>
 
 </html>
